@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>📘 كان وأخواتها - أحجام ضخمة</title>
+    <title>📘 كان وأخواتها - أحجام كبيرة</title>
     <style>
         /* ===== style.css ===== */
         * {
@@ -593,7 +593,7 @@
 
     <script>
         /* ============================================================
-           game.js  –  أحجام أسماك ضخمة (اللاعب 55، الخيارات 75-90)
+           game.js  –  أحجام أسماك كبيرة
            ============================================================ */
 
         // ─── تحميل الصور من مجلد assets ──────────────────────────
@@ -951,7 +951,7 @@
             ctx.fillStyle = '#fff';
             ctx.shadowColor = 'rgba(0,0,0,0.95)';
             ctx.shadowBlur = 10;
-            ctx.font = `bold ${Math.min(r * 0.8, 34)}px 'Segoe UI', Tahoma, sans-serif`;
+            ctx.font = `bold ${Math.min(r * 0.8, 30)}px 'Segoe UI', Tahoma, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(text, 0, 2);
@@ -1158,11 +1158,11 @@
             }
 
             initPlayer() {
-                // 🔥 حجم اللاعب: 55 (كبير جداً)
+                // 🔥 حجم اللاعب: 45 (كبير وواضح)
                 this.player = {
                     x: W / 2,
                     y: H / 2,
-                    radius: 35,
+                    radius: 45,
                     direction: 0,
                     alive: true,
                     wobble: 0,
@@ -1278,20 +1278,20 @@
 
             generateRandomPositions(count) {
                 const positions = [];
-                // هوامش كبيرة جداً لاستيعاب الأحجام الضخمة
-                const margin = 180;
-                const minDist = 220;
+                // هوامش أكبر لاستيعاب الأحجام الكبيرة
+                const margin = 130;
+                const minDist = 180;
                 for (let i = 0; i < count; i++) {
                     let attempts = 0;
                     let x, y, ok;
                     do {
                         x = rand(margin, W - margin);
-                        y = rand(margin + 80, H - margin - 60);
+                        y = rand(margin + 70, H - margin - 50);
                         ok = true;
                         for (const pos of positions) {
                             if (dist({ x, y }, pos) < minDist) { ok = false; break; }
                         }
-                        if (this.player && dist({ x, y }, this.player) < minDist + 50) { ok = false; }
+                        if (this.player && dist({ x, y }, this.player) < minDist + 40) { ok = false; }
                         attempts++;
                         if (attempts > 150) break;
                     } while (!ok);
@@ -1314,7 +1314,7 @@
                 this.waitingForNext = false;
                 feedbackMsg.style.display = 'none';
                 waitingOverlay.style.display = 'none';
-
+                
                 const pos = this.generateRandomPositions(4);
                 // توزيع الصور الأربعة بشكل عشوائي على الخيارات
                 const shuffledImgs = [...optionImgs].sort(() => Math.random() - 0.5);
@@ -1322,8 +1322,8 @@
                 this.fishOptions = [];
                 for (let i = 0; i < 4; i++) {
                     const opt = q.options[i];
-                    // 🔥 حجم أسماك الخيارات: 75-90 (ضخم جداً)
-                    const rad = rand(55, 70);
+                    // 🔥 حجم أسماك الخيارات: 60-72 (كبير جداً)
+                    const rad = rand(70, 82);
                     this.fishOptions.push({
                         x: pos[i].x,
                         y: pos[i].y,
@@ -1363,8 +1363,8 @@
                 feedbackMsg.style.display = 'none';
                 this.currentQuestionIndex++;
                 this.loadQuestion();
-                // 🔥 حد النمو الأقصى للاعب: 100
-                if (this.player && this.player.radius > 100) this.player.radius = 100;
+                // 🔥 حد النمو الأقصى للاعب: 75
+                if (this.player && this.player.radius > 75) this.player.radius = 75;
             }
 
             showWaiting() {
@@ -1383,7 +1383,7 @@
                 document.getElementById('questionBox').style.opacity = '1';
                 this.currentQuestionIndex++;
                 this.loadQuestion();
-                if (this.player && this.player.radius > 100) this.player.radius = 100;
+                if (this.player && this.player.radius > 75) this.player.radius = 75;
             }
 
             gameOver(win = false) {
@@ -1416,16 +1416,16 @@
             }
 
             spawnEatParticles(x, y, color, size, isCorrect) {
-                const count = isCorrect ? 35 : 20;
+                const count = isCorrect ? 30 : 18;
                 const col = isCorrect ? '#6bcf7f' : '#ff6b6b';
                 for (let i = 0; i < count; i++) {
-                    this.particles.push(new Particle(x, y, col, rand(3, 7 + size * 0.08), rand(-6, 6), rand(-5, 0.5), randInt(
-                        14, 40)));
+                    this.particles.push(new Particle(x, y, col, rand(2.5, 6 + size * 0.08), rand(-5, 5), rand(-4, 0.5), randInt(
+                        14, 35)));
                 }
                 if (isCorrect) {
-                    for (let i = 0; i < 12; i++) {
-                        this.particles.push(new Particle(x, y, '#ffd93d', rand(2.5, 5), rand(-4, 4), rand(-3.5, 0.3),
-                            randInt(10, 22)));
+                    for (let i = 0; i < 10; i++) {
+                        this.particles.push(new Particle(x, y, '#ffd93d', rand(2, 4), rand(-3.5, 3.5), rand(-3, 0.3),
+                            randInt(10, 20)));
                     }
                 }
             }
@@ -1446,7 +1446,7 @@
                 const p = this.player;
                 if (!p || !p.alive) return;
 
-                // تتبع سريع للاعب مع حجم ضخم
+                // تتبع سريع للاعب مع حجم أكبر
                 const dx = this.mouseX - p.x;
                 const dy = this.mouseY - p.y;
                 const d = Math.hypot(dx, dy);
@@ -1454,11 +1454,11 @@
                     const targetAngle = Math.atan2(dy, dx);
                     let diff = angleDiff(p.direction, targetAngle);
                     p.direction += diff * 0.1;
-                    const speed = Math.min(d * 0.2, 6.0);
+                    const speed = Math.min(d * 0.2, 5.5);
                     p.x += Math.cos(p.direction) * speed;
                     p.y += Math.sin(p.direction) * speed;
                 }
-                const pad = p.radius + 12;
+                const pad = p.radius + 8;
                 p.x = clamp(p.x, pad, W - pad);
                 p.y = clamp(p.y, pad, H - pad);
                 p.wobble += 0.04;
@@ -1490,8 +1490,8 @@
                     f.x += Math.cos(f.direction + sway) * spd;
                     f.y += Math.sin(f.direction + sway) * spd;
 
-                    // ارتداد مع هامش كبير للأحجام الضخمة
-                    const pad2 = f.radius + 25;
+                    // ارتداد مع هامش أكبر للأحجام الكبيرة
+                    const pad2 = f.radius + 18;
                     if (f.x < pad2) {
                         f.x = pad2;
                         f.direction = Math.PI - f.direction;
@@ -1519,8 +1519,8 @@
                     for (const f of this.fishOptions) {
                         if (!f.alive) continue;
                         const d3 = dist(p, f);
-                        // مسافة تصادم أكبر لتناسب الأحجام الضخمة
-                        if (d3 < p.radius + f.radius - 10) {
+                        // مسافة تصادم أكبر لتناسب الأحجام الكبيرة
+                        if (d3 < p.radius + f.radius - 6) {
                             f.alive = false;
                             this.answered = true;
                             this.questionActive = false;
@@ -1530,8 +1530,8 @@
                                 this.score += 10;
                                 this.correctCount++;
                                 sound.playCorrect();
-                                // 🔥 نمو اللاعب بحد أقصى 100
-                                p.radius = Math.min(p.radius + 3, 100);
+                                // 🔥 نمو اللاعب بحد أقصى 75
+                                p.radius = Math.min(p.radius + 2.5, 75);
                                 this.eatFlash = 12;
                                 if (this.correctCount % 5 === 0) {
                                     this.level++;
@@ -1600,11 +1600,11 @@
                 // ── رسم السمكة البطل بالصورة ──
                 if (this.player && this.player.alive) {
                     const p = this.player;
-                    // توهج خلفي أكبر
-                    const glowSize = p.radius * 2.0 + Math.sin(this.growthPulse) * 6;
+                    // توهج خلفي
+                    const glowSize = p.radius * 1.8 + Math.sin(this.growthPulse) * 5;
                     const grd2 = ctx2.createRadialGradient(p.x, p.y, p.radius * 0.2, p.x, p.y, glowSize);
-                    grd2.addColorStop(0, 'rgba(255,215,0,0.1)');
-                    grd2.addColorStop(0.6, 'rgba(255,215,0,0.05)');
+                    grd2.addColorStop(0, 'rgba(255,215,0,0.08)');
+                    grd2.addColorStop(0.6, 'rgba(255,215,0,0.04)');
                     grd2.addColorStop(1, 'rgba(255,215,0,0)');
                     ctx2.fillStyle = grd2;
                     ctx2.beginPath();
@@ -1664,7 +1664,7 @@
         window.addEventListener('resize', () => { resizeCanvas(); });
         init();
 
-        console.log('🐠 أحجام ضخمة: اللاعب 55، الخيارات 75-90، الحد الأقصى 100');
+        console.log('🐠 أحجام أسماك كبيرة (اللاعب 45، الخيارات 60-72)');
     </script>
 </body>
 </html>

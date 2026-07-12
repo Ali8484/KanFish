@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>📘 كان وأخواتها - أحجام ضخمة</title>
+    <style>
+        /* ===== style.css ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        body {
+            background: #061220;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+        #gameWrapper {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            aspect-ratio: 9 / 16;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9);
+            background: #0a1a2f;
+            touch-action: none;
+        }
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            touch-action: none;
+            cursor: none;
+        }
+
+        /* ===== HUD ===== */
+        #hud {
+            position: absolute;
+            top: 6px;
+            left: 8px;
+            right: 8px;
+            display: none;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 10;
+            font-size: 11px;
+            color: #fff;
+            text-shadow: 0 2px 16px rgba(0, 0, 0, 0.8);
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            gap: 4px;
+        }
+        #hud>div {
+            background: rgba(0, 20, 40, 0.55);
+            backdrop-filter: blur(6px);
+            padding: 4px 10px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            pointer-events: auto;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        #hud .hud-icon {
+            font-size: 12px;
+        }
+        #hud .hud-label {
+            font-size: 8px;
+            opacity: 0.7;
+            font-weight: 400;
+            text-transform: uppercase;
+        }
+        #hud .hud-value {
+            font-size: 12px;
+            min-width: 18px;
+            text-align: center;
+            font-weight: 700;
+        }
+        .hud-value.gold {
+            color: #ffd93d;
+        }
+        .hud-value.green {
+            color: #6bcf7f;
+        }
+
+        /* Question box - مدمج في الأعلى */
+        #questionBox {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(0, 30, 80, 0.5);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 14px;
+            padding: 8px 16px;
+            max-width: 92%;
+            text-align: center;
+            color: #fff;
+            font-size: clamp(0.85rem, 2.2vw, 1.1rem);
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+            display: none;
+            line-height: 1.5;
+            letter-spacing: 0.3px;
+            transition: opacity 0.3s;
+        }
+        #questionBox .grammar-hint {
+            display: block;
+            font-size: 0.5em;
+            opacity: 0.7;
+            font-weight: 400;
+            margin-top: 2px;
+            color: #aaddff;
+        }
+        #questionBox .small-hint {
+            display: none;
+        }
+
+        /* مؤقت الانتظار بين الأسئلة */
+        #waitingOverlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(2px);
+            z-index: 15;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 700;
+            pointer-events: none;
+        }
+        #waitingOverlay .wait-icon {
+            font-size: 2.4rem;
+            animation: pulse 0.8s ease-in-out infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+        #waitingOverlay .wait-text {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        /* رسالة الخطأ التوجيهية */
+        #feedbackMsg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+            background: rgba(10, 5, 20, 0.92);
+            backdrop-filter: blur(12px);
+            border: 2px solid #ff6b6b;
+            border-radius: 20px;
+            padding: 20px 24px;
+            max-width: 88%;
+            text-align: center;
+            color: #fff;
+            display: none;
+            box-shadow: 0 20px 80px rgba(255, 0, 0, 0.2);
+            pointer-events: auto;
+        }
+        #feedbackMsg .fb-title {
+            color: #ff6b6b;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        #feedbackMsg .fb-body {
+            font-size: clamp(0.85rem, 2vw, 1.1rem);
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+        #feedbackMsg .fb-rule {
+            color: #ffd93d;
+            font-weight: 700;
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            padding: 6px 14px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+            margin: 4px 0 8px;
+        }
+        #feedbackMsg .fb-btn {
+            margin-top: 8px;
+            padding: 8px 28px;
+            background: linear-gradient(135deg, #ffb347, #ff8a00);
+            border: none;
+            border-radius: 40px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 24px rgba(255, 138, 0, 0.4);
+            transition: transform 0.15s;
+            touch-action: manipulation;
+        }
+        #feedbackMsg .fb-btn:hover {
+            transform: scale(1.05);
+        }
+        #feedbackMsg .fb-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== Screens ===== */
+        .screen-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            padding: 20px;
+        }
+        .screen-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #startScreen {
+            background: radial-gradient(ellipse at 30% 40%, rgba(10, 40, 80, 0.8), rgba(2, 8, 20, 0.95));
+        }
+        #startScreen .title {
+            font-size: clamp(2.2rem, 10vw, 3.6rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffe066, #ffb347, #ff8a00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 8px 40px rgba(255, 180, 0, 0.3));
+            margin-bottom: 2px;
+            letter-spacing: 2px;
+            line-height: 1.1;
+            text-align: center;
+        }
+        #startScreen .subtitle {
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 14px;
+            text-align: center;
+            font-weight: 300;
+            letter-spacing: 4px;
+            -webkit-text-fill-color: rgba(255, 255, 255, 0.7);
+        }
+        #startScreen .instructions {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: clamp(0.65rem, 1.6vw, 0.8rem);
+            max-width: 320px;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .btn {
+            padding: 10px 32px;
+            font-size: clamp(0.9rem, 2.6vw, 1.2rem);
+            font-weight: 700;
+            border: none;
+            border-radius: 60px;
+            background: linear-gradient(135deg, #ffb347, #ff8a00);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 8px 40px rgba(255, 138, 0, 0.5);
+            transition: transform 0.15s ease, box-shadow 0.25s ease;
+            letter-spacing: 0.5px;
+            touch-action: manipulation;
+            position: relative;
+            overflow: hidden;
+            min-height: 44px;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+            pointer-events: none;
+        }
+        .btn:hover {
+            transform: scale(1.06);
+            box-shadow: 0 12px 50px rgba(255, 138, 0, 0.7);
+        }
+        .btn:active {
+            transform: scale(0.94);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #4ecdc4, #2eaf9a);
+            box-shadow: 0 8px 40px rgba(78, 205, 196, 0.4);
+        }
+        .btn-secondary:hover {
+            box-shadow: 0 12px 50px rgba(78, 205, 196, 0.6);
+        }
+
+        #gameOverScreen {
+            background: radial-gradient(ellipse at center, rgba(40, 8, 20, 0.8), rgba(4, 0, 8, 0.94));
+        }
+        #gameOverScreen .go-title {
+            font-size: clamp(2.2rem, 10vw, 3.6rem);
+            font-weight: 900;
+            color: #ff6b6b;
+            text-shadow: 0 0 60px rgba(255, 80, 80, 0.3);
+            margin-bottom: 2px;
+            letter-spacing: 2px;
+        }
+        #gameOverScreen .go-score {
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            color: #fff;
+            margin: 4px 0 2px;
+        }
+        #gameOverScreen .go-score span {
+            color: #ffe066;
+            font-weight: 700;
+        }
+        #gameOverScreen .go-high {
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 16px;
+        }
+        #gameOverScreen .go-high span {
+            color: #ffd93d;
+            font-weight: 600;
+        }
+        .go-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .go-btns .btn {
+            padding: 8px 24px;
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+        }
+        .go-stats {
+            display: flex;
+            gap: 16px;
+            margin: 4px 0 12px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+        .go-stats span {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        #pauseBtn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 12;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: background 0.2s;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        #pauseBtn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        #cursorFish {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            #gameWrapper {
+                border-radius: 0;
+                max-width: 100%;
+                aspect-ratio: 9 / 16;
+            }
+            #hud {
+                top: 4px;
+                left: 4px;
+                right: 4px;
+                font-size: 10px;
+            }
+            #hud>div {
+                padding: 3px 8px;
+                gap: 3px;
+            }
+            #hud .hud-value {
+                font-size: 11px;
+                min-width: 14px;
+            }
+            #hud .hud-label {
+                font-size: 7px;
+            }
+            #questionBox {
+                top: 42px;
+                padding: 6px 12px;
+                font-size: clamp(0.7rem, 2vw, 0.9rem);
+                max-width: 94%;
+                border-radius: 10px;
+            }
+            #questionBox .grammar-hint {
+                font-size: 0.45em;
+            }
+            #feedbackMsg {
+                padding: 16px 20px;
+                max-width: 92%;
+            }
+            #feedbackMsg .fb-title {
+                font-size: 1.1rem;
+            }
+            #feedbackMsg .fb-body {
+                font-size: 0.8rem;
+            }
+            #feedbackMsg .fb-rule {
+                font-size: 0.9rem;
+                padding: 4px 12px;
+            }
+            #feedbackMsg .fb-btn {
+                padding: 6px 20px;
+                font-size: 0.85rem;
+            }
+            #pauseBtn {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+                top: 6px;
+                right: 6px;
+            }
+            .screen-overlay {
+                padding: 12px;
+            }
+            .btn {
+                padding: 8px 24px;
+                font-size: 0.9rem;
+                min-height: 40px;
+            }
+            .go-btns .btn {
+                padding: 6px 16px;
+                font-size: 0.8rem;
+            }
+            #startScreen .instructions {
+                padding: 8px 12px;
+                font-size: 0.6rem;
+                max-width: 95%;
+            }
+            #waitingOverlay .wait-icon {
+                font-size: 2rem;
+            }
+            #waitingOverlay .wait-text {
+                font-size: 0.7rem;
+            }
+        }
+        @media (max-width: 400px) {
+            #hud .hud-label {
+                display: none;
+            }
+            #hud>div {
+                gap: 3px;
+                padding: 2px 6px;
+            }
+            #hud .hud-value {
+                font-size: 10px;
+            }
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== CURSOR ===== (مخفي للموبايل) -->
+    <div id="cursorFish" class="show">
+        <svg viewBox="0 0 44 44">
+            <ellipse cx="24" cy="22" rx="16" ry="9" fill="#ffcc44" stroke="#e6a800" stroke-width="1.8"/>
+            <polygon points="40,17 44,22 40,27 37,22" fill="#ffcc44" stroke="#e6a800" stroke-width="1.5"/>
+            <circle cx="17" cy="19" r="3.5" fill="#fff"/>
+            <circle cx="16.5" cy="18.5" r="2.2" fill="#1a2a3a"/>
+            <path d="M28 19 Q32 22 28 25" stroke="#e6a800" stroke-width="2" fill="none"/>
+            <circle cx="28" cy="14" r="2" fill="rgba(255,215,0,0.3)"/>
+        </svg>
+    </div>
+
+    <!-- ===== GAME WRAPPER ===== -->
+    <div id="gameWrapper">
+        <canvas id="gameCanvas" width="420" height="740"></canvas>
+
+        <div id="pauseBtn" style="display:none;">⏸</div>
+
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-left">
+                <span class="hud-icon">⭐</span>
+                <span class="hud-label">النقاط</span>
+                <span class="hud-value gold" id="scoreDisplay">0</span>
+                <span class="hud-label" style="margin-left:2px;">|</span>
+                <span class="hud-icon">✅</span>
+                <span class="hud-label">الصحيح</span>
+                <span class="hud-value green" id="correctDisplay">0</span>
+            </div>
+            <div class="hud-right">
+                <span>
+                    <span class="hud-icon">🏆</span>
+                    <span class="hud-label">الأفضل</span>
+                    <span class="hud-value" id="highDisplay">0</span>
+                </span>
+                <span>
+                    <span class="hud-icon">📊</span>
+                    <span class="hud-label">السؤال</span>
+                    <span class="hud-value" id="questionNum">0/0</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Question Box -->
+        <div id="questionBox">
+            <span id="questionText">اختر الفعل المناسب</span>
+            <span class="grammar-hint" id="grammarHint">📖 دلالة الفعل: ...</span>
+        </div>
+
+        <!-- Waiting Overlay -->
+        <div id="waitingOverlay">
+            <div class="wait-icon">⏳</div>
+            <div class="wait-text">جاري تجهيز السؤال التالي...</div>
+        </div>
+
+        <!-- Feedback Message -->
+        <div id="feedbackMsg">
+            <div class="fb-title">❌ ليس صحيحاً!</div>
+            <div class="fb-body" id="fbBody">الجواب الصحيح هو:</div>
+            <div class="fb-rule" id="fbRule">كان</div>
+            <div class="fb-body" style="font-size:0.85em; opacity:0.7; margin-top:2px;" id="fbHint">📖 دلالة الفعل: ...</div>
+            <button class="fb-btn" id="fbRetryBtn">🔄 حاول مجدداً</button>
+        </div>
+
+        <!-- START SCREEN -->
+        <div id="startScreen" class="screen-overlay active">
+            <div class="title">📘 كان وأخواتها</div>
+            <div class="subtitle">تعلم بالقاعدة · صحح بالخطأ</div>
+            <div class="instructions">
+                🐟 حرِّك إصبعك لتوجيه السمكة<br />
+                ❌ عند الخطأ تظهر القاعدة وتختفي الأسماك<br />
+                🔄 اضغط "حاول مجدداً" لسؤال جديد
+            </div>
+            <button class="btn" id="startBtn">🚀 ابدأ التحدي</button>
+        </div>
+
+        <!-- GAME OVER SCREEN -->
+        <div id="gameOverScreen" class="screen-overlay">
+            <div class="go-title">🎉 أكملت جميع الأسئلة!</div>
+            <div class="go-score">النقاط: <span id="finalScore">0</span></div>
+            <div class="go-stats">
+                <span>الصحيح: <span id="finalCorrect">0</span></span>
+                <span>المستوى: <span id="finalLevel">1</span></span>
+            </div>
+            <div class="go-high">🏆 أفضل نتيجة: <span id="finalHigh">0</span></div>
+            <div class="go-btns">
+                <button class="btn" id="restartBtn">🔄 العب مجددًا</button>
+                <button class="btn btn-secondary" id="menuBtn">🏠 القائمة</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================================
+           game.js  –  أحجام أسماك ضخمة (اللاعب 55، الخيارات 75-90)
+           ============================================================ */
+
+        // ─── تحميل الصور من مجلد assets ──────────────────────────
+        const ASSETS_PATH = 'assets/';
+
+        // صورة السمكة البطل
+        const playerImg = new Image();
+        playerImg.src = ASSETS_PATH + 'fish.gif';
+
+        // صور أسماك الخيارات الأربعة
+        const optionImgs = [
+            new Image(),
+            new Image(),
+            new Image(),
+            new Image()
+        ];
+        optionImgs[0].src = ASSETS_PATH + '1.png';
+        optionImgs[1].src = ASSETS_PATH + '2.png';
+        optionImgs[2].src = ASSETS_PATH + '3.png';
+        optionImgs[3].src = ASSETS_PATH + '4.png';
+
+        // ─── قاعدة الأسئلة ─────────────────────────────────────────
+        const QUESTION_POOL = [
+            { sentence: 'السماء _______ صافية في الصباح.', options: ['كانت', 'أصبحت', 'أمسَت', 'باتَت'], correct: 0,
+                verb: 'كان', hint: 'حدث في الماضي' },
+            { sentence: 'الطلاب _______ مجتهدون.', options: ['كانوا', 'أصبحوا', 'ظلوا', 'صاروا'], correct: 0, verb: 'كان',
+                hint: 'حدث في الماضي' },
+            { sentence: 'الماء _______ بارداً.', options: ['كان', 'أصبح', 'أمسى', 'بات'], correct: 0, verb: 'كان',
+                hint: 'حدث في الماضي' },
+            { sentence: 'الحديقة _______ جميلة.', options: ['كانت', 'أصبحت', 'أضحت', 'ظلت'], correct: 0, verb: 'كان',
+                hint: 'حدث في الماضي' },
+            { sentence: 'الجو _______ دافئاً.', options: ['أصبح', 'أمسى', 'بات', 'ظل'], correct: 0, verb: 'أصبح',
+                hint: 'تحول في الصباح' },
+            { sentence: 'الطالب _______ متفوقاً.', options: ['أصبح', 'صار', 'أضحى', 'كان'], correct: 0, verb: 'أصبح',
+                hint: 'تحول وتغيير' },
+            { sentence: 'الشارع _______ مزدحماً.', options: ['أصبح', 'أمسى', 'بات', 'ظل'], correct: 0, verb: 'أصبح',
+                hint: 'تحول في الصباح' },
+            { sentence: 'هي _______ طبيبة ماهرة.', options: ['أصبحت', 'كانت', 'ظلت', 'أمسَت'], correct: 0, verb: 'أصبح',
+                hint: 'تحول وتغيير' },
+            { sentence: 'الليل _______ مظلماً.', options: ['أمسى', 'أضحى', 'بات', 'صار'], correct: 0, verb: 'أمسى',
+                hint: 'وقت المساء' },
+            { sentence: 'النجوم _______ لامعة.', options: ['أمسَت', 'أضحت', 'باتت', 'كانت'], correct: 0, verb: 'أمسى',
+                hint: 'وقت المساء' },
+            { sentence: 'الطرق _______ خالية.', options: ['أمسَت', 'أضحت', 'باتت', 'ظلت'], correct: 0, verb: 'أمسى',
+                hint: 'وقت المساء' },
+            { sentence: 'البيت _______ هادئاً.', options: ['أمسى', 'أضحى', 'بات', 'ظل'], correct: 0, verb: 'أمسى',
+                hint: 'وقت المساء' },
+            { sentence: 'النهار _______ مشرقاً.', options: ['أضحى', 'أمسى', 'بات', 'كان'], correct: 0, verb: 'أضحى',
+                hint: 'وقت الضحى' },
+            { sentence: 'الأسواق _______ مكتظة.', options: ['أضحت', 'أمسَت', 'باتت', 'ظلت'], correct: 0, verb: 'أضحى',
+                hint: 'وقت الضحى' },
+            { sentence: 'الورود _______ متفتحة.', options: ['أضحت', 'أمسَت', 'باتت', 'ظلت'], correct: 0, verb: 'أضحى',
+                hint: 'وقت الضحى' },
+            { sentence: 'الطلاب _______ نشيطون.', options: ['أضحوا', 'أمسوا', 'باتوا', 'كانوا'], correct: 0, verb: 'أضحى',
+                hint: 'وقت الضحى' },
+            { sentence: 'الطفل _______ نائماً.', options: ['بات', 'أمسى', 'أضحى', 'ظل'], correct: 0, verb: 'بات',
+                hint: 'وقت الليل والمبيت' },
+            { sentence: 'الحراس _______ مستيقظين.', options: ['باتوا', 'أمسوا', 'أضحوا', 'ظلوا'], correct: 0, verb: 'بات',
+                hint: 'وقت الليل والمبيت' },
+            { sentence: 'القمر _______ ساطعاً.', options: ['بات', 'أمسى', 'أضحى', 'كان'], correct: 0, verb: 'بات',
+                hint: 'وقت الليل والمبيت' },
+            { sentence: 'الجندي _______ في حراسة الحدود.', options: ['بات', 'أمسى', 'أضحى', 'ظل'], correct: 0, verb: 'بات',
+                hint: 'وقت الليل والمبيت' },
+            { sentence: 'الطقس _______ بارداً.', options: ['ظل', 'صار', 'أمسى', 'بات'], correct: 0, verb: 'ظل',
+                hint: 'استمرارية ودوام' },
+            { sentence: 'التلاميذ _______ في الفصل.', options: ['ظلوا', 'أصبحوا', 'صاروا', 'أضحوا'], correct: 0, verb: 'ظل',
+                hint: 'استمرارية ودوام' },
+            { sentence: 'الجبل _______ شاهقاً.', options: ['ظل', 'صار', 'أمسى', 'بات'], correct: 0, verb: 'ظل',
+                hint: 'استمرارية ودوام' },
+            { sentence: 'الأمل _______ قائماً.', options: ['ظل', 'صار', 'أمسى', 'بات'], correct: 0, verb: 'ظل',
+                hint: 'استمرارية ودوام' },
+            { sentence: 'الماء ساخناً بعد الغليان.', options: ['صار', 'أصبح', 'أمسى', 'بات'], correct: 0, verb: 'صار',
+                hint: 'تحول مطلق (صار)' },
+            { sentence: 'الرجل غنياً بعد التجارة.', options: ['صار', 'أصبح', 'أضحى', 'ظل'], correct: 0, verb: 'صار',
+                hint: 'تحول مطلق (صار)' },
+            { sentence: 'اللون أحمراً بعد الصبغ.', options: ['صار', 'أصبح', 'أمسى', 'بات'], correct: 0, verb: 'صار',
+                hint: 'تحول مطلق (صار)' },
+            { sentence: 'هم أصدقاء مقربين.', options: ['صاروا', 'أصبحوا', 'أضحوا', 'ظلوا'], correct: 0, verb: 'صار',
+                hint: 'تحول مطلق (صار)' },
+            { sentence: 'الجو حاراً اليوم.', options: ['ليس', 'ما زال', 'بات', 'أمسى'], correct: 0, verb: 'ليس',
+                hint: 'نفي (ليس)' },
+            { sentence: 'الكتاب مفيداً للطلاب.', options: ['ليس', 'ما زال', 'أضحى', 'صار'], correct: 0, verb: 'ليس',
+                hint: 'نفي (ليس)' },
+            { sentence: 'الطعام شهياً.', options: ['ليس', 'أصبح', 'أمسى', 'بات'], correct: 0, verb: 'ليس', hint: 'نفي (ليس)' },
+            { sentence: 'هم حاضرين في الاجتماع.', options: ['ليسوا', 'أصبحوا', 'كانوا', 'ظلوا'], correct: 0, verb: 'ليس',
+                hint: 'نفي (ليس)' },
+        ];
+
+        // ─── ترتيب الأسئلة لتنويع الأفعال ──────────────────────────
+        function shuffleQuestions() {
+            const grouped = {};
+            for (const q of QUESTION_POOL) {
+                if (!grouped[q.verb]) grouped[q.verb] = [];
+                grouped[q.verb].push(q);
+            }
+            for (const key in grouped) {
+                grouped[key] = grouped[key].sort(() => Math.random() - 0.5);
+            }
+            const verbs = Object.keys(grouped);
+            const result = [];
+            let maxLen = 0;
+            for (const v of verbs) maxLen = Math.max(maxLen, grouped[v].length);
+            for (let i = 0; i < maxLen; i++) {
+                const shuffledVerbs = verbs.sort(() => Math.random() - 0.5);
+                for (const v of shuffledVerbs) {
+                    if (grouped[v][i]) result.push(grouped[v][i]);
+                }
+            }
+            return result;
+        }
+
+        let QUESTIONS = shuffleQuestions();
+
+        // ─── DOM ──────────────────────────────────────────────────────
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('gameWrapper');
+
+        const hudEl = document.getElementById('hud');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const highDisplay = document.getElementById('highDisplay');
+        const correctDisplay = document.getElementById('correctDisplay');
+        const questionNum = document.getElementById('questionNum');
+        const questionText = document.getElementById('questionText');
+        const grammarHint = document.getElementById('grammarHint');
+
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScore = document.getElementById('finalScore');
+        const finalHigh = document.getElementById('finalHigh');
+        const finalCorrect = document.getElementById('finalCorrect');
+        const finalLevel = document.getElementById('finalLevel');
+
+        const feedbackMsg = document.getElementById('feedbackMsg');
+        const fbBody = document.getElementById('fbBody');
+        const fbRule = document.getElementById('fbRule');
+        const fbHint = document.getElementById('fbHint');
+        const fbRetryBtn = document.getElementById('fbRetryBtn');
+
+        const waitingOverlay = document.getElementById('waitingOverlay');
+
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const menuBtn = document.getElementById('menuBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        // ─── CANVAS SIZING ──────────────────────────────────────────
+        let W = 420,
+            H = 740;
+
+        function resizeCanvas() {
+            const rect = wrapper.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const w = rect.width;
+            const h = rect.height;
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            W = canvas.width;
+            H = canvas.height;
+            ctx.scale(1, 1);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // ─── UTILITY ──────────────────────────────────────────────────
+        const rand = (a, b) => Math.random() * (b - a) + a;
+        const randInt = (a, b) => Math.floor(rand(a, b + 1));
+        const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+        const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, v));
+        const angleDiff = (a, b) => { let d = b - a; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math
+                .PI * 2; return d; };
+        const choice = arr => arr[Math.floor(Math.random() * arr.length)];
+
+        function hexToRgb(hex) {
+            const c = hex.replace('#', '');
+            return { r: parseInt(c.substr(0, 2), 16), g: parseInt(c.substr(2, 2), 16), b: parseInt(c.substr(4, 2), 16) };
+        }
+
+        function rgbToStr(r, g, b) { return `rgb(${r|0},${g|0},${b|0})`; }
+
+        function lighten(col, amt) {
+            const c = hexToRgb(col);
+            return rgbToStr(Math.min(255, c.r + amt), Math.min(255, c.g + amt), Math.min(255, c.b + amt));
+        }
+
+        function darken(col, amt) {
+            const c = hexToRgb(col);
+            return rgbToStr(Math.max(0, c.r - amt), Math.max(0, c.g - amt), Math.max(0, c.b - amt));
+        }
+
+        // ─── AUDIO ──────────────────────────────────────────────────
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+                try { this.ctx = new(window.AudioContext || window.webkitAudioContext)(); } catch (_) { this.enabled =
+                    false; }
+            }
+            resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); }
+            playEat(freq = 550) {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, this.ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+                    osc.start(this.ctx.currentTime);
+                    osc.stop(this.ctx.currentTime + 0.15);
+                } catch (_) {}
+            }
+            playGameOver() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    [500, 400, 300, 200].forEach((f, i) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.1);
+                        gain.gain.setValueAtTime(0.07, this.ctx.currentTime + i * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.1 + 0.2);
+                        osc.start(this.ctx.currentTime + i * 0.1);
+                        osc.stop(this.ctx.currentTime + i * 0.1 + 0.2);
+                    });
+                } catch (_) {}
+            }
+            playCorrect() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    [523, 659, 784].forEach((f, i) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.08);
+                        gain.gain.setValueAtTime(0.1, this.ctx.currentTime + i * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.08 + 0.14);
+                        osc.start(this.ctx.currentTime + i * 0.08);
+                        osc.stop(this.ctx.currentTime + i * 0.08 + 0.14);
+                    });
+                } catch (_) {}
+            }
+            playWrong() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(250, this.ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+                    osc.start(this.ctx.currentTime);
+                    osc.stop(this.ctx.currentTime + 0.2);
+                } catch (_) {}
+            }
+        }
+        const sound = new SoundFX();
+
+        // ─── HIGH SCORE ─────────────────────────────────────────────
+        function getHighScore() { return parseInt(localStorage.getItem('fishGrammarHigh') || '0'); }
+
+        function setHighScore(v) { localStorage.setItem('fishGrammarHigh', String(v)); }
+
+        // ─── DRAWING: رسم السمكة بالصورة والنص ─────────────────────
+        function drawFishWithImage(ctx, x, y, radius, img, text, direction, pulse = 0) {
+            const r = radius;
+            const ang = direction;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(ang);
+
+            const size = r * 2.2; // حجم الرسم متناسب مع نصف القطر
+
+            // رسم الصورة إذا كانت موجودة ومحمّلة
+            if (img && img.complete && img.naturalWidth > 0) {
+                ctx.drawImage(img, -size / 2, -size / 2, size, size);
+            } else {
+                // رسم احتياطي (شكل سمكة بسيط) في حال لم تتحمل الصورة
+                const col = '#ffcc44';
+                const bw = r * 1.6;
+                const bh = r * 1.0;
+                const grad = ctx.createRadialGradient(-r * 0.2, -r * 0.2, r * 0.1, 0, 0, r * 1.3);
+                grad.addColorStop(0, lighten(col, 50));
+                grad.addColorStop(0.6, col);
+                grad.addColorStop(1, darken(col, 40));
+                ctx.fillStyle = grad;
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = r * 0.4;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 3;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, bw, bh, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = darken(col, 60);
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                // ذيل بسيط
+                const tw = r * 0.7;
+                const th = r * 0.8;
+                ctx.fillStyle = darken(col, 15);
+                ctx.strokeStyle = darken(col, 50);
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(bw * 0.85, 0);
+                ctx.quadraticCurveTo(bw * 0.85 + tw * 0.4, -th * 0.8, bw * 0.85 + tw * 0.9, -th * 0.6);
+                ctx.quadraticCurveTo(bw * 0.85 + tw * 0.5, -th * 0.2, bw * 0.85 + tw * 0.8, 0);
+                ctx.quadraticCurveTo(bw * 0.85 + tw * 0.5, th * 0.2, bw * 0.85 + tw * 0.9, th * 0.6);
+                ctx.quadraticCurveTo(bw * 0.85 + tw * 0.4, th * 0.8, bw * 0.85, 0);
+                ctx.fill();
+                ctx.stroke();
+                // زعنفة ظهرية
+                ctx.fillStyle = darken(col, 10);
+                ctx.beginPath();
+                ctx.moveTo(-r * 0.1, -bh * 0.6);
+                ctx.quadraticCurveTo(r * 0.15, -bh * 1.4, r * 0.5, -bh * 0.6);
+                ctx.fill();
+                ctx.stroke();
+                // عين بسيطة
+                const eyeX = r * 0.4;
+                const eyeY = -r * 0.1;
+                const eyeR = r * 0.26;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.ellipse(eyeX, eyeY, eyeR, eyeR * 0.9, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+                ctx.fillStyle = '#1a2a3a';
+                ctx.beginPath();
+                ctx.arc(eyeX + eyeR * 0.2, eyeY + eyeR * 0.1, eyeR * 0.6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.beginPath();
+                ctx.arc(eyeX - eyeR * 0.3, eyeY - eyeR * 0.3, eyeR * 0.25, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // ── رسم النص فوق الصورة ──
+            ctx.save();
+            ctx.rotate(-ang);
+            ctx.fillStyle = '#fff';
+            ctx.shadowColor = 'rgba(0,0,0,0.95)';
+            ctx.shadowBlur = 10;
+            ctx.font = `bold ${Math.min(r * 0.8, 34)}px 'Segoe UI', Tahoma, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 0, 2);
+            ctx.shadowBlur = 0;
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        // ─── ENVIRONMENT ──────────────────────────────────────────
+        function drawSeaweed(ctx2, x, y, height, color, phase, time) {
+            ctx2.save();
+            ctx2.translate(x, y);
+            const segs = 6;
+            ctx2.beginPath();
+            ctx2.moveTo(0, 0);
+            for (let i = 0; i <= segs; i++) {
+                const t = i / segs;
+                const py = -t * height;
+                const sway = Math.sin(t * 4 + time * 0.5 + phase) * (3 + t * 12);
+                ctx2.lineTo(sway, py);
+            }
+            ctx2.strokeStyle = color;
+            ctx2.lineWidth = 2 + Math.sin(phase) * 0.4;
+            ctx2.lineCap = 'round';
+            ctx2.shadowColor = 'rgba(0,0,0,0.15)';
+            ctx2.shadowBlur = 6;
+            ctx2.stroke();
+            for (let i = 2; i < segs; i += 2) {
+                const t = i / segs;
+                const py = -t * height;
+                const sway = Math.sin(t * 4 + time * 0.5 + phase) * (3 + t * 12);
+                ctx2.save();
+                ctx2.translate(sway, py);
+                ctx2.rotate(Math.sin(time * 0.4 + phase + i) * 0.3 + 0.6);
+                ctx2.fillStyle = color;
+                ctx2.globalAlpha = 0.4;
+                ctx2.beginPath();
+                ctx2.ellipse(4 + t * 2, 0, 3 + t * 2, 1.2 + t * 1, 0, 0, Math.PI * 2);
+                ctx2.fill();
+                ctx2.restore();
+            }
+            ctx2.restore();
+        }
+
+        function drawBubble(ctx2, x, y, r, alpha, time) {
+            ctx2.save();
+            ctx2.globalAlpha = alpha * 0.4;
+            ctx2.shadowColor = 'rgba(255,255,255,0.05)';
+            ctx2.shadowBlur = 8;
+            const grad = ctx2.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.05, x, y, r);
+            grad.addColorStop(0, 'rgba(255,255,255,0.6)');
+            grad.addColorStop(0.3, 'rgba(200,230,255,0.1)');
+            grad.addColorStop(1, 'rgba(100,180,255,0.01)');
+            ctx2.fillStyle = grad;
+            ctx2.beginPath();
+            ctx2.arc(x, y, r, 0, Math.PI * 2);
+            ctx2.fill();
+            ctx2.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx2.lineWidth = 0.5;
+            ctx2.stroke();
+            ctx2.globalAlpha = alpha * 0.15;
+            ctx2.fillStyle = '#fff';
+            ctx2.beginPath();
+            ctx2.arc(x - r * 0.2, y - r * 0.3, r * 0.12, 0, Math.PI * 2);
+            ctx2.fill();
+            ctx2.restore();
+        }
+
+        function drawLightRays(ctx2, time) {
+            ctx2.save();
+            ctx2.globalAlpha = 0.03;
+            for (let i = 0; i < 4; i++) {
+                const x = (i * 140 + Math.sin(time * 0.005 + i) * 30) % (W + 80) - 40;
+                const angle = 0.15 + Math.sin(time * 0.003 + i * 0.7) * 0.08;
+                ctx2.fillStyle = '#fff';
+                ctx2.beginPath();
+                ctx2.moveTo(x, -20);
+                ctx2.lineTo(x + 40 + Math.sin(time * 0.004 + i) * 20, -20);
+                ctx2.lineTo(x + 40 + Math.sin(time * 0.004 + i) * 20 + Math.sin(angle) * 250, H + 20);
+                ctx2.lineTo(x + Math.sin(angle) * 250, H + 20);
+                ctx2.closePath();
+                ctx2.fill();
+            }
+            ctx2.globalAlpha = 1;
+            ctx2.restore();
+        }
+
+        // ─── PARTICLES ──────────────────────────────────────────────
+        class Particle {
+            constructor(x, y, color, size, vx, vy, life) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx || rand(-2.5, 2.5);
+                this.vy = vy || rand(-3, 0.5);
+                this.radius = rand(2, size || 5);
+                this.color = color || '#ffcc44';
+                this.life = life || randInt(18, 35);
+                this.maxLife = this.life;
+                this.gravity = rand(-0.01, 0.02);
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity;
+                this.vx *= 0.97;
+                this.vy *= 0.97;
+                this.life--;
+                this.radius *= 0.993;
+            }
+            draw(ctx2) {
+                const alpha = this.life / this.maxLife;
+                ctx2.globalAlpha = alpha * 0.9;
+                ctx2.shadowBlur = 0;
+                ctx2.fillStyle = this.color;
+                ctx2.beginPath();
+                ctx2.arc(this.x, this.y, Math.max(0.3, this.radius), 0, Math.PI * 2);
+                ctx2.fill();
+                ctx2.globalAlpha = alpha * 0.2;
+                ctx2.shadowBlur = 6;
+                ctx2.shadowColor = this.color;
+                ctx2.beginPath();
+                ctx2.arc(this.x, this.y, this.radius * 1.8, 0, Math.PI * 2);
+                ctx2.fill();
+                ctx2.globalAlpha = 1;
+                ctx2.shadowBlur = 0;
+            }
+            get dead() { return this.life <= 0 || this.radius < 0.2; }
+        }
+
+        // ─── BUBBLE ──────────────────────────────────────────────────
+        class Bubble {
+            constructor() { this.reset();
+                this.y = rand(0, H * 0.8); }
+            reset() {
+                this.x = rand(15, W - 15);
+                this.y = H + rand(10, 50);
+                this.radius = rand(2, 8);
+                this.speed = rand(0.15, 0.6);
+                this.wobbleSpeed = rand(0.01, 0.03);
+                this.phase = rand(0, Math.PI * 2);
+                this.alpha = rand(0.2, 0.6);
+            }
+            update() {
+                this.y -= this.speed;
+                this.x += Math.sin(this.phase) * 0.25;
+                this.phase += this.wobbleSpeed;
+                if (this.y < -25) this.reset();
+            }
+            draw(ctx2, time) { drawBubble(ctx2, this.x, this.y, this.radius, this.alpha, time); }
+        }
+
+        // ─── GAME CLASS ─────────────────────────────────────────────
+        class Game {
+            constructor() {
+                this.state = 'menu';
+                this.score = 0;
+                this.highScore = getHighScore();
+                this.correctCount = 0;
+                this.totalQuestions = QUESTIONS.length;
+                this.currentQuestionIndex = 0;
+                this.fishOptions = [];
+                this.player = null;
+                this.particles = [];
+                this.bubbles = [];
+                this.seaweeds = [];
+                this.time = 0;
+                this.mouseX = W / 2;
+                this.mouseY = H / 2;
+                this.eatFlash = 0;
+                this.gameOverShake = 0;
+                this.growthPulse = 0;
+                this.paused = false;
+                this.level = 1;
+                this.questionActive = false;
+                this.answered = false;
+                this.wrongAnswerActive = false;
+                this.waitingForNext = false;
+
+                this.initEnvironment();
+                this.initPlayer();
+                this.setupEvents();
+                this.updateHUD();
+            }
+
+            initEnvironment() {
+                this.bubbles = [];
+                for (let i = 0; i < 14; i++) {
+                    const b = new Bubble();
+                    b.y = rand(0, H);
+                    this.bubbles.push(b);
+                }
+                this.seaweeds = [];
+                const swColors = ['#1a6b3a', '#2d8a4e', '#1e7a42', '#3a9a5a', '#0f5a2a', '#4aaf6a'];
+                for (let i = 0; i < 8; i++) {
+                    this.seaweeds.push({
+                        x: rand(10, W - 10),
+                        y: H + rand(-15, 5),
+                        height: rand(30, 80),
+                        color: choice(swColors),
+                        phase: rand(0, Math.PI * 2),
+                    });
+                }
+            }
+
+            initPlayer() {
+                // 🔥 حجم اللاعب: 55 (كبير جداً)
+                this.player = {
+                    x: W / 2,
+                    y: H / 2,
+                    radius: 55,
+                    direction: 0,
+                    alive: true,
+                    wobble: 0,
+                };
+            }
+
+            setupEvents() {
+                // ── معالجة اللمس ──
+                const onTouch = (e) => {
+                    e.preventDefault();
+                    sound.resume();
+                    const rect = canvas.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    if (touch) {
+                        const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
+                        const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
+                        this.mouseX = clamp(x, 0, W);
+                        this.mouseY = clamp(y, 0, H);
+                    }
+                };
+                canvas.addEventListener('touchstart', onTouch, { passive: false });
+                canvas.addEventListener('touchmove', onTouch, { passive: false });
+                canvas.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
+
+                // ── دعم الماوس ──
+                const onMove = (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                    this.mouseX = clamp(x, 0, W);
+                    this.mouseY = clamp(y, 0, H);
+                };
+                canvas.addEventListener('mousemove', onMove);
+                canvas.addEventListener('mousedown', () => { sound.resume(); });
+
+                // ── Keyboard ──
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                        if (this.state === 'menu') this.startGame();
+                        else if (this.state === 'gameover') this.restartGame();
+                    }
+                    if (e.key === 'p' || e.key === 'P') {
+                        if (this.state === 'playing' && !this.wrongAnswerActive && !this.waitingForNext)
+                            this.togglePause();
+                    }
+                });
+
+                // ── Buttons ──
+                startBtn.addEventListener('click', () => { sound.resume();
+                    this.startGame(); });
+                restartBtn.addEventListener('click', () => { sound.resume();
+                    this.restartGame(); });
+                menuBtn.addEventListener('click', () => { sound.resume();
+                    this.goToMenu(); });
+                pauseBtn.addEventListener('click', () => { if (!this.wrongAnswerActive && !this.waitingForNext) this
+                        .togglePause(); });
+
+                fbRetryBtn.addEventListener('click', () => {
+                    this.hideWrongFeedback();
+                });
+            }
+
+            startGame() {
+                if (this.state === 'playing') return;
+                sound.resume();
+                this.state = 'playing';
+                this.score = 0;
+                this.correctCount = 0;
+                this.currentQuestionIndex = 0;
+                this.level = 1;
+                this.time = 0;
+                this.eatFlash = 0;
+                this.gameOverShake = 0;
+                this.answered = false;
+                this.wrongAnswerActive = false;
+                this.waitingForNext = false;
+                this.initPlayer();
+                this.particles = [];
+                this.fishOptions = [];
+                startScreen.classList.remove('active');
+                gameOverScreen.classList.remove('active');
+                feedbackMsg.style.display = 'none';
+                waitingOverlay.style.display = 'none';
+                hudEl.style.display = 'flex';
+                pauseBtn.style.display = 'flex';
+                document.getElementById('questionBox').style.display = 'block';
+                this.updateHUD();
+                this.loadQuestion();
+            }
+
+            restartGame() { this.startGame(); }
+
+            goToMenu() {
+                this.state = 'menu';
+                this.paused = false;
+                this.wrongAnswerActive = false;
+                this.waitingForNext = false;
+                feedbackMsg.style.display = 'none';
+                waitingOverlay.style.display = 'none';
+                pauseBtn.textContent = '⏸';
+                startScreen.classList.add('active');
+                gameOverScreen.classList.remove('active');
+                hudEl.style.display = 'none';
+                pauseBtn.style.display = 'none';
+                document.getElementById('questionBox').style.display = 'none';
+            }
+
+            togglePause() {
+                if (this.state !== 'playing' || this.wrongAnswerActive || this.waitingForNext) return;
+                this.paused = !this.paused;
+                pauseBtn.textContent = this.paused ? '▶' : '⏸';
+            }
+
+            generateRandomPositions(count) {
+                const positions = [];
+                // هوامش كبيرة جداً لاستيعاب الأحجام الضخمة
+                const margin = 180;
+                const minDist = 220;
+                for (let i = 0; i < count; i++) {
+                    let attempts = 0;
+                    let x, y, ok;
+                    do {
+                        x = rand(margin, W - margin);
+                        y = rand(margin + 80, H - margin - 60);
+                        ok = true;
+                        for (const pos of positions) {
+                            if (dist({ x, y }, pos) < minDist) { ok = false; break; }
+                        }
+                        if (this.player && dist({ x, y }, this.player) < minDist + 50) { ok = false; }
+                        attempts++;
+                        if (attempts > 150) break;
+                    } while (!ok);
+                    positions.push({ x, y });
+                }
+                return positions;
+            }
+
+            loadQuestion() {
+                if (this.currentQuestionIndex >= this.totalQuestions) {
+                    this.gameOver(true);
+                    return;
+                }
+                const q = QUESTIONS[this.currentQuestionIndex];
+                questionText.textContent = q.sentence;
+                grammarHint.textContent = '📖 ' + q.hint;
+                this.answered = false;
+                this.questionActive = true;
+                this.wrongAnswerActive = false;
+                this.waitingForNext = false;
+                feedbackMsg.style.display = 'none';
+                waitingOverlay.style.display = 'none';
+
+                const pos = this.generateRandomPositions(4);
+                // توزيع الصور الأربعة بشكل عشوائي على الخيارات
+                const shuffledImgs = [...optionImgs].sort(() => Math.random() - 0.5);
+
+                this.fishOptions = [];
+                for (let i = 0; i < 4; i++) {
+                    const opt = q.options[i];
+                    // 🔥 حجم أسماك الخيارات: 75-90 (ضخم جداً)
+                    const rad = rand(75, 90);
+                    this.fishOptions.push({
+                        x: pos[i].x,
+                        y: pos[i].y,
+                        radius: rad,
+                        img: shuffledImgs[i % shuffledImgs.length],
+                        text: opt,
+                        direction: rand(0, Math.PI * 2),
+                        targetDir: rand(0, Math.PI * 2),
+                        speed: rand(0.8, 1.6),
+                        wobble: rand(0, Math.PI * 2),
+                        isCorrect: (i === q.correct),
+                        alive: true,
+                        index: i,
+                        dirChangeTimer: randInt(120, 300),
+                    });
+                }
+                this.updateHUD();
+            }
+
+            showWrongFeedback(correctAnswer, hint) {
+                this.wrongAnswerActive = true;
+                this.paused = true;
+                pauseBtn.textContent = '⏸';
+                for (const f of this.fishOptions) f.alive = false;
+                const q = QUESTIONS[this.currentQuestionIndex];
+                fbBody.textContent = `الجواب الصحيح هو:`;
+                fbRule.textContent = correctAnswer;
+                fbHint.textContent = '📖 ' + hint;
+                feedbackMsg.style.display = 'block';
+                sound.playWrong();
+            }
+
+            hideWrongFeedback() {
+                this.wrongAnswerActive = false;
+                this.paused = false;
+                pauseBtn.textContent = '⏸';
+                feedbackMsg.style.display = 'none';
+                this.currentQuestionIndex++;
+                this.loadQuestion();
+                // 🔥 حد النمو الأقصى للاعب: 100
+                if (this.player && this.player.radius > 100) this.player.radius = 100;
+            }
+
+            showWaiting() {
+                this.waitingForNext = true;
+                this.paused = true;
+                pauseBtn.textContent = '⏸';
+                waitingOverlay.style.display = 'flex';
+                document.getElementById('questionBox').style.opacity = '0.3';
+            }
+
+            hideWaiting() {
+                this.waitingForNext = false;
+                this.paused = false;
+                pauseBtn.textContent = '⏸';
+                waitingOverlay.style.display = 'none';
+                document.getElementById('questionBox').style.opacity = '1';
+                this.currentQuestionIndex++;
+                this.loadQuestion();
+                if (this.player && this.player.radius > 100) this.player.radius = 100;
+            }
+
+            gameOver(win = false) {
+                this.state = 'gameover';
+                if (win) {
+                    sound.playCorrect();
+                    this.score += 20;
+                }
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    setHighScore(this.highScore);
+                }
+                finalScore.textContent = this.score;
+                finalHigh.textContent = this.highScore;
+                finalCorrect.textContent = this.correctCount;
+                finalLevel.textContent = this.level;
+                gameOverScreen.classList.add('active');
+                hudEl.style.display = 'none';
+                pauseBtn.style.display = 'none';
+                document.getElementById('questionBox').style.display = 'none';
+                feedbackMsg.style.display = 'none';
+                waitingOverlay.style.display = 'none';
+            }
+
+            updateHUD() {
+                scoreDisplay.textContent = this.score;
+                highDisplay.textContent = this.highScore;
+                correctDisplay.textContent = this.correctCount;
+                questionNum.textContent = `${Math.min(this.currentQuestionIndex+1, this.totalQuestions)}/${this.totalQuestions}`;
+            }
+
+            spawnEatParticles(x, y, color, size, isCorrect) {
+                const count = isCorrect ? 35 : 20;
+                const col = isCorrect ? '#6bcf7f' : '#ff6b6b';
+                for (let i = 0; i < count; i++) {
+                    this.particles.push(new Particle(x, y, col, rand(3, 7 + size * 0.08), rand(-6, 6), rand(-5, 0.5), randInt(
+                        14, 40)));
+                }
+                if (isCorrect) {
+                    for (let i = 0; i < 12; i++) {
+                        this.particles.push(new Particle(x, y, '#ffd93d', rand(2.5, 5), rand(-4, 4), rand(-3.5, 0.3),
+                            randInt(10, 22)));
+                    }
+                }
+            }
+
+            // ─── UPDATE ──────────────────────────────────────────────
+            update() {
+                if (this.state !== 'playing') return;
+                if (this.wrongAnswerActive || this.waitingForNext) {
+                    for (const b of this.bubbles) b.update();
+                    for (const pt of this.particles) pt.update();
+                    this.particles = this.particles.filter(pt => !pt.dead);
+                    return;
+                }
+                if (this.paused) return;
+
+                this.time++;
+
+                const p = this.player;
+                if (!p || !p.alive) return;
+
+                // تتبع سريع للاعب مع حجم ضخم
+                const dx = this.mouseX - p.x;
+                const dy = this.mouseY - p.y;
+                const d = Math.hypot(dx, dy);
+                if (d > 2) {
+                    const targetAngle = Math.atan2(dy, dx);
+                    let diff = angleDiff(p.direction, targetAngle);
+                    p.direction += diff * 0.1;
+                    const speed = Math.min(d * 0.2, 6.0);
+                    p.x += Math.cos(p.direction) * speed;
+                    p.y += Math.sin(p.direction) * speed;
+                }
+                const pad = p.radius + 12;
+                p.x = clamp(p.x, pad, W - pad);
+                p.y = clamp(p.y, pad, H - pad);
+                p.wobble += 0.04;
+                this.growthPulse += 0.03;
+
+                // ── حركة أسماك الخيارات ──
+                for (const f of this.fishOptions) {
+                    if (!f.alive) continue;
+
+                    f.wobble += 0.04;
+
+                    f.dirChangeTimer--;
+                    if (f.dirChangeTimer <= 0) {
+                        const angles = [
+                            0, Math.PI, Math.PI / 2, -Math.PI / 2,
+                            Math.PI / 4, -Math.PI / 4, 3 * Math.PI / 4, -3 * Math.PI / 4
+                        ];
+                        f.targetDir = choice(angles) + rand(-0.15, 0.15);
+                        f.dirChangeTimer = randInt(150, 350);
+                        f.speed = rand(0.7, 1.8);
+                    }
+
+                    let diff2 = angleDiff(f.direction, f.targetDir);
+                    f.direction += diff2 * 0.025;
+
+                    const sway = Math.sin(f.wobble * 0.6) * 0.15;
+                    const spd = f.speed * (0.9 + Math.sin(f.wobble * 0.8) * 0.1);
+
+                    f.x += Math.cos(f.direction + sway) * spd;
+                    f.y += Math.sin(f.direction + sway) * spd;
+
+                    // ارتداد مع هامش كبير للأحجام الضخمة
+                    const pad2 = f.radius + 25;
+                    if (f.x < pad2) {
+                        f.x = pad2;
+                        f.direction = Math.PI - f.direction;
+                        f.targetDir = f.direction + rand(-0.2, 0.2);
+                    }
+                    if (f.x > W - pad2) {
+                        f.x = W - pad2;
+                        f.direction = Math.PI - f.direction;
+                        f.targetDir = f.direction + rand(-0.2, 0.2);
+                    }
+                    if (f.y < pad2) {
+                        f.y = pad2;
+                        f.direction = -f.direction;
+                        f.targetDir = f.direction + rand(-0.2, 0.2);
+                    }
+                    if (f.y > H - pad2) {
+                        f.y = H - pad2;
+                        f.direction = -f.direction;
+                        f.targetDir = f.direction + rand(-0.2, 0.2);
+                    }
+                }
+
+                // ── التصادم ──
+                if (!this.answered && this.questionActive) {
+                    for (const f of this.fishOptions) {
+                        if (!f.alive) continue;
+                        const d3 = dist(p, f);
+                        // مسافة تصادم أكبر لتناسب الأحجام الضخمة
+                        if (d3 < p.radius + f.radius - 10) {
+                            f.alive = false;
+                            this.answered = true;
+                            this.questionActive = false;
+
+                            if (f.isCorrect) {
+                                this.spawnEatParticles(f.x, f.y, f.color || '#ffcc44', f.radius, true);
+                                this.score += 10;
+                                this.correctCount++;
+                                sound.playCorrect();
+                                // 🔥 نمو اللاعب بحد أقصى 100
+                                p.radius = Math.min(p.radius + 3, 100);
+                                this.eatFlash = 12;
+                                if (this.correctCount % 5 === 0) {
+                                    this.level++;
+                                    sound.playCorrect();
+                                }
+                                this.updateHUD();
+                                this.showWaiting();
+                                setTimeout(() => {
+                                    if (this.state === 'playing') this.hideWaiting();
+                                }, 2000);
+                            } else {
+                                const q = QUESTIONS[this.currentQuestionIndex];
+                                const correctText = q.options[q.correct];
+                                this.showWrongFeedback(correctText, q.hint);
+                                f.alive = true;
+                                this.answered = false;
+                                this.questionActive = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                for (const pt of this.particles) pt.update();
+                this.particles = this.particles.filter(pt => !pt.dead);
+                for (const b of this.bubbles) b.update();
+
+                if (this.eatFlash > 0) this.eatFlash--;
+                if (this.gameOverShake > 0) this.gameOverShake *= 0.92;
+                if (this.gameOverShake < 0.15) this.gameOverShake = 0;
+                this.updateHUD();
+            }
+
+            // ─── DRAW ─────────────────────────────────────────────────
+            draw() {
+                const ctx2 = ctx;
+                const w = W,
+                    h = H;
+
+                ctx2.save();
+                if (this.gameOverShake > 0.5) {
+                    const sh = this.gameOverShake;
+                    ctx2.translate(rand(-sh, sh), rand(-sh, sh));
+                }
+
+                // خلفية
+                const grad = ctx2.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#071e3a');
+                grad.addColorStop(0.3, '#0a2a4a');
+                grad.addColorStop(0.6, '#0d3d5c');
+                grad.addColorStop(0.85, '#0a2a4a');
+                grad.addColorStop(1, '#041420');
+                ctx2.fillStyle = grad;
+                ctx2.fillRect(0, 0, w, h);
+
+                drawLightRays(ctx2, this.time);
+                for (const sw of this.seaweeds) drawSeaweed(ctx2, sw.x, sw.y, sw.height, sw.color, sw.phase, this.time);
+                for (const b of this.bubbles) b.draw(ctx2, this.time);
+
+                // ── رسم أسماك الخيارات بالصور ──
+                for (const f of this.fishOptions) {
+                    if (!f.alive) continue;
+                    drawFishWithImage(ctx2, f.x, f.y, f.radius, f.img, f.text, f.direction, this.time + f.wobble);
+                }
+
+                // ── رسم السمكة البطل بالصورة ──
+                if (this.player && this.player.alive) {
+                    const p = this.player;
+                    // توهج خلفي أكبر
+                    const glowSize = p.radius * 2.0 + Math.sin(this.growthPulse) * 6;
+                    const grd2 = ctx2.createRadialGradient(p.x, p.y, p.radius * 0.2, p.x, p.y, glowSize);
+                    grd2.addColorStop(0, 'rgba(255,215,0,0.1)');
+                    grd2.addColorStop(0.6, 'rgba(255,215,0,0.05)');
+                    grd2.addColorStop(1, 'rgba(255,215,0,0)');
+                    ctx2.fillStyle = grd2;
+                    ctx2.beginPath();
+                    ctx2.arc(p.x, p.y, glowSize, 0, Math.PI * 2);
+                    ctx2.fill();
+
+                    drawFishWithImage(ctx2, p.x, p.y, p.radius, playerImg, '🐟', p.direction, this.time + p.wobble);
+                }
+
+                for (const pt of this.particles) pt.draw(ctx2);
+
+                if (this.eatFlash > 0 && this.player) {
+                    const alpha = this.eatFlash / 12 * 0.25;
+                    ctx2.globalAlpha = alpha;
+                    ctx2.fillStyle = '#6bcf7f';
+                    ctx2.beginPath();
+                    ctx2.arc(this.player.x, this.player.y, this.player.radius * 1.6, 0, Math.PI * 2);
+                    ctx2.fill();
+                    ctx2.globalAlpha = 1;
+                }
+
+                if (this.paused && !this.wrongAnswerActive && !this.waitingForNext && this.state === 'playing') {
+                    ctx2.fillStyle = 'rgba(0,0,0,0.4)';
+                    ctx2.fillRect(0, 0, w, h);
+                    ctx2.fillStyle = '#fff';
+                    ctx2.font = 'bold 24px sans-serif';
+                    ctx2.textAlign = 'center';
+                    ctx2.textBaseline = 'middle';
+                    ctx2.fillText('⏸ متوقف مؤقتاً', w / 2, h / 2 - 10);
+                    ctx2.font = '14px sans-serif';
+                    ctx2.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx2.fillText('اضغط P أو زر ⏸ للمتابعة', w / 2, h / 2 + 40);
+                }
+
+                ctx2.restore();
+            }
+
+            loop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.loop());
+            }
+        }
+
+        // ─── INIT ─────────────────────────────────────────────────────
+        let game = null;
+
+        function init() {
+            game = new Game();
+            startBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (game) game.startGame();
+            });
+            game.loop();
+        }
+
+        window.addEventListener('resize', () => { resizeCanvas(); });
+        init();
+
+        console.log('🐠 أحجام ضخمة: اللاعب 55، الخيارات 75-90، الحد الأقصى 100');
+    </script>
+</body>
+</html>
